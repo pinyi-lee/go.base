@@ -21,7 +21,7 @@ func HealthHandler(c *gin.Context) {
 
 // VersionHandler is version checker API
 // @Tags     Default
-// @Success  200  {string}  string  "0.4.12"
+// @Success  200  {string}  string  "0.1.0"
 // @Router   /version [get]
 func VersionHandler(c *gin.Context) {
 	version := config.Env.Version

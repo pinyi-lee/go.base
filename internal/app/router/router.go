@@ -2,7 +2,9 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/swaggo/swag/example/basic/docs"
+	"github.com/pinyi-lee/go.base.git/docs"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/pinyi-lee/go.base.git/internal/app/handler"
 	"github.com/pinyi-lee/go.base.git/internal/pkg/config"
@@ -22,6 +24,7 @@ func SetupRouter() (router *gin.Engine) {
 	router = gin.Default()
 	router.Use(handler.CORSMiddleware(), handler.ErrorMiddleware())
 
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	router.GET("/health", handler.HealthHandler)
 	router.GET("/version", handler.VersionHandler)
 
