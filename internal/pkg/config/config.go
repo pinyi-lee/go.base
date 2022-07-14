@@ -39,7 +39,7 @@ const (
 var Env EnvVariable
 
 type EnvVariable struct {
-	Version                         string   `env:"VERSION" envDefault:"0.4.4"`
+	Version                         string   `env:"VERSION" envDefault:"0.1.0"`
 	Port                            string   `env:"GO_HTTP_PORT,required"`
 	LogLevel                        string   `env:"LOG_LEVEL" envDefault:"INFO"`
 	DeployEnvironment               string   `env:"DEPLOY_ENVIRONMENT" envDefault:"DEVELOP"`
