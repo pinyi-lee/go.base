@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -47,21 +46,6 @@ func TestMain(m *testing.M) {
 	httpmock.ActivateNonDefault(client.Get().GetClient())
 
 	r := m.Run()
-
-	if r == 0 && testing.CoverMode() != "" {
-		c := testing.Coverage() * 100
-		l := 0.00
-		fmt.Println("=================================================")
-		fmt.Println("||               Coverage Report               ||")
-		fmt.Println("=================================================")
-		fmt.Printf("Cover mode: %s\n", testing.CoverMode())
-		fmt.Printf("Coverage  : %.2f %% (Threshold: %.2f %%)\n\n", c, l)
-		if c < l {
-			fmt.Println("[Tests passed but coverage failed]")
-			r = -1
-		}
-	}
-
 	os.Exit(r)
 }
 
@@ -73,20 +57,35 @@ func Setup() {
 	}
 
 	/*
-		if err = cache.GetInstance().Setup(cache.Config{
-			Type:         config.Env.RedisType,
-			EndpointList: config.Env.RedisEndpointList,
-			Password:     config.Env.RedisPassword,
+		if err = elasticsearch.GetInstance().Setup(elasticsearch.Config{
+			Url:         config.Env.ElasticsearchUrl,
+			IndexPrefix: config.Env.ElasticsearchIndexPrefix,
 		}); err != nil {
-			log.Fatalf("cache Setup, error:%v", err)
+			log.Fatalf("elasticsearch Setup, error:%v", err)
+		}
+	*/
+
+	if err = client.Setup(); err != nil {
+		log.Fatal(err)
+	}
+
+	if err = logger.Setup(config.Env.LogLevel); err != nil {
+		log.Fatal(err)
+	}
+
+	/*
+		if err = mongo.GetInstance().Setup(mongo.Config{
+			URI: config.Env.MongoURI,
+		}); err != nil {
+			log.Fatalf("mongo Setup, error:%v", err)
 		}
 	*/
 
 	/*
-		if err = database.GetInstance().Setup(database.Config{
-			URI: config.Env.MongoURI,
+		if err = nats.GetInstance().Setup(nats.Config{
+			Url: config.Env.NatsUrl,
 		}); err != nil {
-			log.Fatalf("database Setup, error:%v", err)
+			log.Fatalf("nats Setup, error:%v", err)
 		}
 	*/
 
@@ -107,29 +106,14 @@ func Setup() {
 	*/
 
 	/*
-		if err = queue.GetInstance().Setup(queue.Config{
-			Url: config.Env.NatsUrl,
+		if err = redis.GetInstance().Setup(redis.Config{
+			Type:         config.Env.RedisType,
+			EndpointList: config.Env.RedisEndpointList,
+			Password:     config.Env.RedisPassword,
 		}); err != nil {
-			log.Fatalf("queue Setup, error:%v", err)
+			log.Fatalf("redis Setup, error:%v", err)
 		}
 	*/
-
-	/*
-		if err = search.GetInstance().Setup(search.Config{
-			Url:         config.Env.ElasticsearchUrl,
-			IndexPrefix: config.Env.ElasticsearchIndexPrefix,
-		}); err != nil {
-			log.Fatalf("search Setup, error:%v", err)
-		}
-	*/
-
-	if err = logger.Setup(config.Env.LogLevel); err != nil {
-		log.Fatal(err)
-	}
-
-	if err = client.Setup(); err != nil {
-		log.Fatal(err)
-	}
 
 	if err = router.Setup(); err != nil {
 		log.Fatal(err)

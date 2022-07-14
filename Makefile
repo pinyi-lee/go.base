@@ -5,33 +5,22 @@ COMMIT_ID := $(shell git rev-parse HEAD | awk '{print substr($$0,0,8)}')
 GO_PATH := $(shell go env GOPATH)
 FILE_PATH := $(shell pwd)
 SOURCE_PATH := $(FILE_PATH:$(GO_PATH)%=%)
-PKG_TO_TEST := $(shell go list ./... | grep -v docs | grep -v test | tr '\n' ',' | sed 's/,$$//')
 IMAGE := xxxxxxxxxxxx.dkr.ecr.us-west-2.amazonaws.com/account/$(SERVICE):$(VERSION)_$(COMMIT_ID)
 
 echo:
-	@echo $(SERVICE)
-	@echo $(VERSION)
-	@echo $(COMMIT_ID)
-	@echo $(GO_PATH)
-	@echo $(FILE_PATH)
-	@echo $(SOURCE_PATH)
-	@echo $(PKG_TO_TEST)
-	@echo $(IMAGE)
+	@echo "SERVICE: $(SERVICE)"
+	@echo "VERSION: $(VERSION)"
+	@echo "COMMIT_ID: $(COMMIT_ID)"
+	@echo "GO_PATH: $(GO_PATH)"
+	@echo "FILE_PATH: $(FILE_PATH)"
+	@echo "SOURCE_PATH: $(SOURCE_PATH)"
+	@echo "IMAGE: $(IMAGE)"
 
 install:
 	@go mod tidy
 
 fmt:
 	@gofmt -w .
-
-build:
-	@go install github.com/swaggo/swag/cmd/swag@latest
-	@$(GO_PATH)/bin/swag init -g cmd/main.go
-	@go build -v -o $(SERVICE)
-
-run:
-	@make build
-	@./$(SERVICE)
 
 clean:
 	@rm -rf $(SERVICE)
@@ -40,25 +29,37 @@ clean:
 	@rm -f Dockerfile
 	@go clean -i ./...
 
-testReport:
+build:
+	@make clean
+	@go install github.com/swaggo/swag/cmd/swag@latest
+	@$(GO_PATH)/bin/swag init -g cmd/main.go
+	@go build -v -o $(SERVICE) $(SOURCE_PATH)/cmd
+
+run:
+	@make build
+	@./$(SERVICE)
+
+check:
+	@make clean
 	@go install github.com/swaggo/swag/cmd/swag@latest
 	@$(GO_PATH)/bin/swag init -g cmd/main.go
 	@rm -rf coverage
 	@mkdir coverage
-	@go test -v -coverpkg=$(PKG_TO_TEST) -coverprofile=coverage/coverage.out -covermode=count 2>&1 | tee coverage/test.log
-	@cat coverage/test.log | go-junit-report > coverage/test_result.xml
-	@go tool cover -html=coverage/coverage.out -o coverage/coverage.html
-	@gocover-cobertura < coverage/coverage.out > coverage/coverage.xml
+	@go test ./... | tee coverage/test.log
 
 docker:
+	@make clean
 	@go install github.com/swaggo/swag/cmd/swag@latest
 	@$(GO_PATH)/bin/swag init -g cmd/main.go
 	@export SOURCE_PATH=$(SOURCE_PATH); envsubst '$$SOURCE_PATH' < Dockerfile.temp > Dockerfile;
 	@docker build -t $(IMAGE) .
 
 help:
+	@echo "make echo: echo parameter"
 	@echo "make install: install all dependency"
-	@echo "make fmt: format the coding style of this project"
-	@echo "make build: build this project to binary file"
-	@echo "make clean: remove binary file and dir when building/testing"
-	@echo "make testReport: run test and generate coverage.html in coverage/"
+	@echo "make fmt: format the coding style"
+	@echo "make clean: remove binary file and dir"
+	@echo "make build: build binary file"
+	@echo "make run: run binary file"
+	@echo "make check: run test"
+	@echo "make docker: build docker"
