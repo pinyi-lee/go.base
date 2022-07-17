@@ -2,10 +2,12 @@ package mongo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	Mongo "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
 )
 
 var (
@@ -17,16 +19,27 @@ func GetInstance() *Manager {
 }
 
 type Manager struct {
-	Client  *Mongo.Client
-	context context.Context
+	context      context.Context
+	client       *Mongo.Client
+	databaseName string
 }
 
 type Config struct {
 	URI string
 }
 
+var ERROR_DATA_NOT_FOUND = errors.New("data not found")
+
 func (manager *Manager) Setup(config Config) error {
 	background := context.Background()
+
+	connstring, err := connstring.ParseAndValidate(config.URI)
+	if err != nil {
+		fmt.Printf("mongo connstring parse and validate fail, error : %+v\n", err)
+		return err
+	}
+
+	databaseName := connstring.Database
 
 	clientOptions := options.Client().ApplyURI(config.URI)
 	client, err := Mongo.Connect(background, clientOptions)
@@ -42,13 +55,14 @@ func (manager *Manager) Setup(config Config) error {
 	}
 
 	instance = &Manager{
-		Client:  client,
-		context: background,
+		context:      background,
+		client:       client,
+		databaseName: databaseName,
 	}
 
 	return nil
 }
 
 func (manager *Manager) Close() {
-	manager.Client.Disconnect(manager.context)
+	manager.client.Disconnect(manager.context)
 }
