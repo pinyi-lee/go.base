@@ -22,6 +22,7 @@ type serviceError struct {
 	BadRequestError       func(string) ServiceResp
 	ForbiddenError        func(string) ServiceResp
 	NotFoundError         ServiceResp
+	StatusConflictError   func(string) ServiceResp
 	FailedDependencyError func(string) ServiceResp
 	InternalServiceError  func(string) ServiceResp
 }
@@ -50,6 +51,9 @@ var ServiceError = serviceError{
 	},
 	NotFoundError: ServiceResp{
 		http.StatusNotFound, ServiceErrMsg{http.StatusText(http.StatusNotFound)},
+	},
+	StatusConflictError: func(msg string) ServiceResp {
+		return ServiceResp{http.StatusConflict, ServiceErrMsg{msg}}
 	},
 	FailedDependencyError: func(msg string) ServiceResp {
 		return ServiceResp{http.StatusFailedDependency, ServiceErrMsg{msg}}
