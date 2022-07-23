@@ -47,7 +47,7 @@ func RandString(length int) string {
 }
 
 func Timestamp() int64 {
-	return time.Now().Unix()
+	return time.Now().UnixMilli()
 }
 
 func StructToJsonString(data interface{}) string {
