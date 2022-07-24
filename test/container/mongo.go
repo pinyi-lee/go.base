@@ -40,8 +40,7 @@ func SetupMongo(ctx context.Context) (*MongoContainer, error) {
 		return nil, hostErr
 	}
 
-	os.Setenv("DATABASE_HOST", hostIP)
-	os.Setenv("DATABASE_PORT", mappedPort.Port())
+	os.Setenv("MONGO_URI", fmt.Sprintf("mongodb://%s:%s/go-base-service", hostIP, mappedPort.Port()))
 
 	uri := fmt.Sprintf("mongodb://%s:%s", hostIP, mappedPort.Port())
 

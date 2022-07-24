@@ -55,7 +55,9 @@ func sendHttp(method string, path string, body string, headers map[string]string
 
 func setHeader(req *http.Request, headers map[string]string) {
 	req.Header.Set("Content-Type", "application/json")
-	for key, value := range headers {
-		req.Header.Set(key, value)
+	if headers != nil {
+		for key, value := range headers {
+			req.Header.Set(key, value)
+		}
 	}
 }
