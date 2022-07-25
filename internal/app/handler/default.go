@@ -63,6 +63,10 @@ func result(c *gin.Context, data interface{}, err model.ServiceResp) {
 		logger.Info.Printf("status=%+v, resp=%+v\n", http.StatusNotFound, util.StructToJsonString(err.ErrMsg))
 		c.JSON(http.StatusNotFound, err.ErrMsg)
 
+	case http.StatusConflict:
+		logger.Info.Printf("status=%+v, resp=%+v\n", http.StatusConflict, util.StructToJsonString(err.ErrMsg))
+		c.JSON(http.StatusConflict, err.ErrMsg)
+
 	case http.StatusFailedDependency:
 		logger.Info.Printf("status=%+v, resp=%+v\n", http.StatusFailedDependency, util.StructToJsonString(err.ErrMsg))
 		c.JSON(http.StatusFailedDependency, err.ErrMsg)
